@@ -1,0 +1,6 @@
+file_download.link:
+  path: '/file-download/download/{scheme}/{fid}'
+  defaults:
+    _controller:  '\Drupal\file_download\Controller\FileDownloadDownloadController::deliver'
+  requirements:
+    _access: 'TRUE'

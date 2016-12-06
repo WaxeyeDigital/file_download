@@ -1,0 +1,5 @@
+type: module
+name: 'File Download'
+description: 'Enable a file to download.'
+core: 8.x
+
