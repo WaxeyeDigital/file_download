@@ -27,65 +27,91 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
   /**
    * {@inheritdoc}
    */
-//  public static function defaultSettings() {
-//    $options = parent::defaultSettings();
-//
-//    $options['render_view'] = TRUE;
-//    return $options;
-//  }
+  public static function defaultSettings() {
+    $options = parent::defaultSettings();
+
+    $options['link_title'] = 'title';
+    return $options;
+  }
 
   /**
    * {@inheritdoc}
    */
-//  public function settingsForm(array $form, FormStateInterface $form_state) {
-//    $form = parent::settingsForm($form, $form_state);
-//    // We may decide on alternatives to rendering the view so get settings established
-//    $form['render_view'] = [
-//      '#type' => 'checkbox',
-//      '#title' => $this->t('Render View'),
-//      '#default_value' => $this->getSetting('render_view'),
-//    ];
-//
-//    return $form;
-//  }
+  public function settingsForm(array $form, FormStateInterface $form_state) {
+    $form = parent::settingsForm($form, $form_state);
+    //
+    $form['link_title'] = [
+      '#type' => 'radios',
+      '#options' => array('file' => 'Title of file', 'empty' => 'Nothing'),
+      '#title' => $this->t('Title Display'),
+      '#description' => $this->t('Control what is displayed in the title of the link'),
+      '#default_value' => $this->getSetting('link_title'),
+    ];
+
+    return $form;
+  }
 
   /**
    * {@inheritdoc}
    */
-//  public function settingsSummary() {
-//    $summary = array();
-//    $settings = $this->getSettings();
-//
-//    $summary[] = t('Render View: @view', array('@view' => $settings['render_view'] ? 'TRUE' : 'FALSE'));
-//    return $summary;
-//  }
+  public function settingsSummary() {
+    $summary = array();
+    $settings = $this->getSettings();
+
+    $summary[] = t('Title Display: @view', array('@view' => $settings['link_title']));
+    return $summary;
+  }
 
   /**
    * {@inheritdoc}
    */
   public function viewElements(FieldItemListInterface $items, $langcode) {
     $elements = [];
+    $settings = $this->getSettings();
 
     foreach ($this->getEntitiesToView($items, $langcode) as $delta => $file) {
       $item = $file->_referringItem;
 
-      $elements[$delta] = array(
-        '#theme' => 'download_file_link',
-        '#file' => $file,
-        '#description' => $item->description,
-        '#cache' => array(
-          'tags' => $file->getCacheTags(),
-        ),
-      );
+      switch ($settings['link_title']) {
+        case 'empty':
+          $title = '&nbsp;';
+          break;
 
-      // Pass field item attributes to the theme function.
-      if (isset($item->_attributes)) {
-        $elements[$delta] += array('#attributes' => array());
-        $elements[$delta]['#attributes'] += $item->_attributes;
-        // Unset field item attributes since they have been included in the
-        // formatter output and should not be rendered in the field template.
-        unset($item->_attributes);
+        default:
+          // If title has no value then filename is subsituted
+          // See template_preprocess_download_file_link()
+          $title = NULL;
       }
+
+      $uri = $file->getFileUri();
+
+//      if (file_exists($uri)) {
+        $elements[$delta] = array(
+          '#theme' => 'download_file_link',
+          '#file' => $file,
+          '#description' => $title,
+          '#cache' => array(
+            'tags' => $file->getCacheTags(),
+          ),
+        );
+        // Pass field item attributes to the theme function.
+        if (isset($item->_attributes)) {
+          $elements[$delta] += array('#attributes' => array());
+          $elements[$delta]['#attributes'] += $item->_attributes;
+          // Unset field item attributes since they have been included in the
+          // formatter output and should not be rendered in the field template.
+          unset($item->_attributes);
+        }
+//      }
+//      else {
+//
+//        $elements[$delta] = array(
+//          '#cache' => array(
+//            'tags' => $file->getCacheTags(),
+//          ),
+//        );
+//      }
+
     }
 
     return $elements;

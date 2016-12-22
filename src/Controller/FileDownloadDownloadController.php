@@ -12,9 +12,11 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Drupal\Core\Extension\ModuleHandler;
+use Drupal\Component\Utility\Unicode;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * Defines a controller to serve image styles.
+ * Defines a controller to serve file downloads
  */
 class FileDownloadDownloadController extends FileDownloadController {
 
@@ -24,13 +26,6 @@ class FileDownloadDownloadController extends FileDownloadController {
    * @var \Drupal\Core\Lock\LockBackendInterface
    */
   protected $lock;
-
-  /**
-   * The image factory.
-   *
-   * @var \Drupal\Core\Image\ImageFactory
-   */
-  protected $imageFactory;
 
   /**
    * A logger instance.
@@ -64,16 +59,14 @@ class FileDownloadDownloadController extends FileDownloadController {
 //  }
 
   /**
-   * Generates a derivative, given a style and image path.
-   *
-   * After generating an image, transfer it to the requesting agent.
+   * Generates a download
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The request object.
    * @param string $scheme
    *   The file scheme, defaults to 'private'.
-   * @param \Drupal\image\ImageStyleInterface $image_style
-   *   The image style to deliver.
+   * @param \Drupal\file\Entity $fid
+   *   The file id
    *
    * @return \Symfony\Component\HttpFoundation\BinaryFileResponse|\Symfony\Component\HttpFoundation\Response
    *   The transferred file as response or some error response.
@@ -84,15 +77,24 @@ class FileDownloadDownloadController extends FileDownloadController {
    *   Thrown when the file is still being generated.
    */
   public function deliver(Request $request, $scheme, $fid) {
+
     $file = File::load($fid);
     $uri = $file->getFileUri();
     $parts = explode('://', $uri);
-    $filepath = \Drupal::service('file_system')->realpath($scheme . "://");
-    $uri = $filepath . '/' . $parts[1];
+    $file_directory = \Drupal::service('file_system')->realpath($scheme . "://");
+    $filepath = $file_directory . '/' . $parts[1];
+    $filename = $file->getFilename();
 
+    // File doesn't exist
+    // This may occur if the download path is used outside of a formatter and the file path is wrong or file is gone
+    if (!file_exists($filepath)) {
+      throw new NotFoundHttpException();
+    }
+
+    $mimetype = Unicode::mimeHeaderEncode($file->getMimeType());
     $headers = array(
-      'Content-Type'              => 'force-download',
-      'Content-Disposition'       => 'attachment; filename="' . $file->getFilename() . '"',
+      'Content-Type'              => $mimetype,
+      'Content-Disposition'       => 'attachment; filename="' . $filename . '"',
       'Content-Length'            => $file->getSize(),
       'Content-Transfer-Encoding' => 'binary',
       'Pragma'                    => 'no-cache',
@@ -115,5 +117,6 @@ class FileDownloadDownloadController extends FileDownloadController {
     // $public parameter to make sure we don't change the headers.
     return new BinaryFileResponse($uri, 200, $headers, $scheme !== 'private');
   }
+
 
 }

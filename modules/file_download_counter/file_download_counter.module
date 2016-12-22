@@ -102,9 +102,9 @@ function file_download_counter_cron() {
  */
 function file_download_counter_title_list($dbfield, $dbrows) {
   if (in_array($dbfield, array('totalcount', 'daycount', 'timestamp'))) {
-    $query = db_select('node_field_data', 'n');
+    $query = db_select('file_managed', 'f');
     $query->addTag('node_access');
-    $query->join('file_download_counter', 's', 'n.nid = s.nid');
+    $query->join('file_download_counter', 'c', 'f.fid=s.fid');
     $query->join('users_field_data', 'u', 'n.uid = u.uid');
 
     return $query
@@ -138,21 +138,23 @@ function file_download_counter_title_list($dbfield, $dbrows) {
  *     "today". For the daycount to be reset, cron must be enabled.
  *   - timestamp: Integer for the timestamp of when the node was last viewed.
  */
-function file_download_counter_get($nid) {
+function file_download_counter_get($fid) {
 
-  if ($nid > 0) {
+  if ($fid > 0) {
     // Retrieve an array with both totalcount and daycount.
-    return db_query('SELECT totalcount, daycount, timestamp FROM {file_download_counter} WHERE nid = :nid', array(':nid' => $nid), array('target' => 'replica'))->fetchAssoc();
+    return db_query('SELECT totalcount, daycount, timestamp FROM {file_download_counter} WHERE nid = :fid',
+      array(':fid' => $fid), array('target' => 'replica'))->fetchAssoc();
   }
 }
 
 /**
  * Implements hook_ENTITY_TYPE_predelete() for node entities.
  */
-function file_download_counter_node_predelete(EntityInterface $node) {
+
+function file_download_counter_file_predelete(EntityInterface $file) {
   // Clean up file_download_counter table when node is deleted.
   db_delete('file_download_counter')
-    ->condition('nid', $node->id())
+    ->condition('fid', $file->id())
     ->execute();
 }
 
@@ -168,7 +170,7 @@ function file_download_counter_ranking() {
           'type' => 'LEFT',
           'table' => 'file_download_counter',
           'alias' => 'file_download_counter',
-          'on' => 'file_download_counter.nid = i.sid',
+          'on' => 'file_download_counter.fid = i.fid',
         ),
         // Inverse law that maps the highest view count on the site to 1 and 0
         // to 0. Note that the ROUND here is necessary for PostgreSQL and SQLite

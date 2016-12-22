@@ -34,6 +34,7 @@ function template_preprocess_download_file_link(&$variables) {
   // Set options as per anchor format described at
   // http://microformats.org/wiki/file-format-examples
   $options['attributes']['type'] = $mime_type . '; length=' . $file->getSize();
+  $options['attributes']['download'] = $url;
 
   // Use the description as the link text if available.
   if (empty($variables['description'])) {
@@ -56,6 +57,7 @@ function template_preprocess_download_file_link(&$variables) {
   // Set file classes to the options array.
   $variables['attributes'] = new Attribute($variables['attributes']);
   $variables['attributes']->addClass($classes);
+
 
   $uri = $file_entity->getFileUri();
   $parts = explode('://', $uri);
