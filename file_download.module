@@ -20,7 +20,7 @@ use Drupal\Core\Url;
 function template_preprocess_download_file_link(&$variables) {
   $file = $variables['file'];
   $options = array();
-
+  
   $file_entity = ($file instanceof File) ? $file : File::load($file->fid);
   // @todo Wrap in file_url_transform_relative(). This is currently
   // impossible. As a work-around, we currently add the 'url.site' cache context
@@ -34,16 +34,11 @@ function template_preprocess_download_file_link(&$variables) {
   // Set options as per anchor format described at
   // http://microformats.org/wiki/file-format-examples
   $options['attributes']['type'] = $mime_type . '; length=' . $file->getSize();
-  $options['attributes']['download'] = $url;
 
-  // Use the description as the link text if available.
-  if (empty($variables['description'])) {
-    $link_text = $file_entity->getFilename();
-  }
-  else {
-    $link_text = $variables['description'];
+
+    $link_text = $variables['title'];
     $options['attributes']['title'] = $file_entity->getFilename();
-  }
+
 
   // Classes to add to the file field for icons.
   $classes = array(
@@ -58,12 +53,14 @@ function template_preprocess_download_file_link(&$variables) {
   $variables['attributes'] = new Attribute($variables['attributes']);
   $variables['attributes']->addClass($classes);
 
-
   $uri = $file_entity->getFileUri();
   $parts = explode('://', $uri);
   $url = 'internal:/file-download/download/' . $parts[0] . '/' . $file_entity->id();
-  $variables['link'] = \Drupal::l($link_text, Url::fromUri($url, $options));
-
+  $variables['link'] = [
+    '#type' => 'link',
+    '#title' => $link_text,
+    '#url' => Url::fromUri($url, $options),
+  ];
 }
 
 /**
@@ -73,7 +70,10 @@ function file_download_theme() {
   return array(
     // From file.module.
     'download_file_link' => array(
-      'variables' => array('file' => NULL, 'description' => NULL, 'attributes' => array()),
+      'variables' => array('file' => NULL, 'title' => NULL, 'attributes' => array()),
+    ),
+    'download_file_title' => array(
+      'variables' => array('title' => NULL, 'attributes' => array()),
     ),
 
   );

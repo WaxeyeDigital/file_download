@@ -79,6 +79,9 @@ class FileDownloadDownloadController extends FileDownloadController {
   public function deliver(Request $request, $scheme, $fid) {
 
     $file = File::load($fid);
+    if (!is_object($file)) {
+      throw new NotFoundHttpException();
+    }
     $uri = $file->getFileUri();
     $parts = explode('://', $uri);
     $file_directory = \Drupal::service('file_system')->realpath($scheme . "://");
@@ -89,6 +92,14 @@ class FileDownloadDownloadController extends FileDownloadController {
     // This may occur if the download path is used outside of a formatter and the file path is wrong or file is gone
     if (!file_exists($filepath)) {
       throw new NotFoundHttpException();
+    }
+
+    $headers = $this->moduleHandler()->invokeAll('file_download', array($uri));
+
+    foreach ($headers as $result) {
+      if ($result == -1) {
+        throw new AccessDeniedHttpException();
+      }
     }
 
     $mimetype = Unicode::mimeHeaderEncode($file->getMimeType());
