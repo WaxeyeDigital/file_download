@@ -34,31 +34,7 @@ class FileDownloadDownloadController extends FileDownloadController {
    */
   protected $logger;
 
-  /**
-   * Constructs a ImageStyleDownloadController object.
-   *
-   * @param \Drupal\Core\Lock\LockBackendInterface $lock
-   *   The lock backend.
-   * @param \Drupal\Core\Image\ImageFactory $image_factory
-   *   The image factory.
-   */
-//  public function __construct(LockBackendInterface $lock, ImageFactory $image_factory) {
-//    $this->lock = $lock;
-//    $this->imageFactory = $image_factory;
-//    $this->logger = $this->getLogger('image');
-//  }
-
-  /**
-   * {@inheritdoc}
-   */
-//  public static function create(ContainerInterface $container) {
-//    return new static(
-//      $container->get('lock'),
-//      $container->get('image.factory')
-//    );
-//  }
-
-  /**
+   /**
    * Generates a download
    *
    * @param \Symfony\Component\HttpFoundation\Request $request

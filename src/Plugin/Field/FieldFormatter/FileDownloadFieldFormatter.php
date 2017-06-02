@@ -107,10 +107,6 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
     $elements = [];
     $settings = $this->getSettings();
     $current_user = \Drupal::currentUser();
-    $download = FALSE;
-    if ($current_user->hasPermission('access file download')) {
-     $download = TRUE;
-    }
 
     foreach ($this->getEntitiesToView($items, $langcode) as $delta => $file) {
       $item = $file->_referringItem;
@@ -136,7 +132,6 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
           $title = NULL;
       }
 
-//      if ($download) {
         $elements[$delta] = array(
           '#theme' => 'download_file_link',
           '#file' => $file,
@@ -146,16 +141,6 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
             'tags' => $file->getCacheTags(),
           ),
         );
-//      }
-//      else {
-//        $elements[$delta] = array(
-//          '#theme' => 'download_file_title',
-//          '#title' => $title,
-//          '#cache' => array(
-//            'tags' => $file->getCacheTags(),
-//          ),
-//        );
-//      }
 
         // Pass field item attributes to the theme function.
         if (isset($item->_attributes)) {
@@ -171,28 +156,4 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
     return $elements;
   }
 
-  /**
-   * {@inheritdoc}
-   */
-//  public static function isApplicable(FieldDefinitionInterface $field_definition) {
-//    return $field_definition->getTargetEntityTypeId() === 'user' && $field_definition->getName() === 'name';
-//  }
-
-
-  /**
-   * {@inheritdoc}
-   */
-//  protected function checkAccess(EntityInterface $entity) {
-//    // Allow access based on permission settings
-//    \Drupal::logger('chorus_user')->notice('check access ');
-//    $current_user = \Drupal::currentUser();
-//    if ($current_user->hasPermission('access file download')) {
-//      \Drupal::logger('chorus_user')->notice('allowed ');
-//      return AccessResult::allowed();
-//    }
-//    else {
-//      \Drupal::logger('chorus_user')->notice('forbidden ');
-//      return AccessResult::isForbidden();
-//    }
-//  }
 }
