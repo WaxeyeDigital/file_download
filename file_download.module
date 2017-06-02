@@ -20,7 +20,7 @@ use Drupal\Core\Url;
 function template_preprocess_download_file_link(&$variables) {
   $file = $variables['file'];
   $options = array();
-  
+
   $file_entity = ($file instanceof File) ? $file : File::load($file->fid);
   // @todo Wrap in file_url_transform_relative(). This is currently
   // impossible. As a work-around, we currently add the 'url.site' cache context
@@ -36,9 +36,14 @@ function template_preprocess_download_file_link(&$variables) {
   $options['attributes']['type'] = $mime_type . '; length=' . $file->getSize();
 
 
-    $link_text = $variables['title'];
+  // Use the description as the link text if available.
+  if (empty($variables['description'])) {
+    $link_text = $file_entity->getFilename();
+  }
+  else {
+    $link_text = $variables['description'];
     $options['attributes']['title'] = $file_entity->getFilename();
-
+  }
 
   // Classes to add to the file field for icons.
   $classes = array(
@@ -56,6 +61,7 @@ function template_preprocess_download_file_link(&$variables) {
   $uri = $file_entity->getFileUri();
   $parts = explode('://', $uri);
   $url = 'internal:/file-download/download/' . $parts[0] . '/' . $file_entity->id();
+
   $variables['link'] = [
     '#type' => 'link',
     '#title' => $link_text,
@@ -70,7 +76,7 @@ function file_download_theme() {
   return array(
     // From file.module.
     'download_file_link' => array(
-      'variables' => array('file' => NULL, 'title' => NULL, 'attributes' => array()),
+      'variables' => array('file' => NULL, 'title' => NULL, 'description' => NULL, 'attributes' => array()),
     ),
     'download_file_title' => array(
       'variables' => array('title' => NULL, 'attributes' => array()),
