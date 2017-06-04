@@ -2,15 +2,12 @@
 
 namespace Drupal\file_download\Plugin\Field\FieldFormatter;
 
-use Drupal\Component\Utility\Unicode;
-use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\file\Plugin\Field\FieldFormatter\FileFormatterBase;
 use Drupal\Core\Field\FormatterBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\file\Entity\File;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Access\AccessResult;
 
 
 /**
@@ -53,19 +50,6 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
 
     $fieldName = $this->fieldDefinition->getName();
 
-    $form['custom_title_text'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('Custom text'),
-      '#default_value' => $this->getSetting('custom_title_text'),
-      '#placeholder' => $this->t('e.g. "Download"'),
-      '#description' => $this->t('Provide a custom text to display for all download links.'),
-      '#states' => [
-        'visible' => [
-          ":input[name=\"fields[{$fieldName}][settings_edit_form][settings][link_title]\"]" => ['value' => 'custom'],
-        ],
-      ],
-    ];
-
     return $form;
   }
 
@@ -77,7 +61,6 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
       'file' => $this->t('Title of file'),
       'entity_title' => 'Title of parent entity',
       'empty' => $this->t('Nothing'),
-      'custom' => $this->t('Custom text')
     ];
   }
 
@@ -93,10 +76,6 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
     $tArgs = ['@view' => $displayOptions[$selectedTitleDisplay]];
     $summary[] = $this->t('Title Display: @view', $tArgs);
 
-    if ($selectedTitleDisplay === 'custom') {
-      $tArgs = ['@text' => $settings['custom_title_text']];
-      $summary[] = $this->t('Custom text: @text', $tArgs);
-    }
     return $summary;
   }
 
@@ -121,10 +100,6 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
           if ($entity->get('title')->getValue() != NULL) {
             $title = $entity->get('title')->getValue()[0]['value'];
           }
-
-        case 'custom':
-          $title = $settings['custom_title_text'];
-          break;
 
         default:
           // If title has no value then filename is substituted
