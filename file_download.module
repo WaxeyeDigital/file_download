@@ -36,12 +36,12 @@ function template_preprocess_download_file_link(&$variables) {
   $options['attributes']['type'] = $mime_type . '; length=' . $file->getSize();
 
 
-  // Use the description as the link text if available.
-  if (empty($variables['description'])) {
+  // Use the title as the link text if available.
+  if (empty($variables['title'])) {
     $link_text = $file_entity->getFilename();
   }
   else {
-    $link_text = $variables['description'];
+    $link_text = $variables['title'];
     $options['attributes']['title'] = $file_entity->getFilename();
   }
 

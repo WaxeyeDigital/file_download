@@ -29,8 +29,7 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
   public static function defaultSettings() {
     $options = parent::defaultSettings();
 
-    $options['link_title'] = 'title';
-    $options['custom_title_text'] = '';
+    $options['link_title'] = 'file';
     return $options;
   }
 
@@ -85,12 +84,13 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
   public function viewElements(FieldItemListInterface $items, $langcode) {
     $elements = [];
     $settings = $this->getSettings();
-    $current_user = \Drupal::currentUser();
 
     foreach ($this->getEntitiesToView($items, $langcode) as $delta => $file) {
       $item = $file->_referringItem;
 
       switch ($settings['link_title']) {
+
+        // This is useful for instance if you are using an icon
         case 'empty':
           $title = '';
           break;
@@ -100,7 +100,9 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
           if ($entity->get('title')->getValue() != NULL) {
             $title = $entity->get('title')->getValue()[0]['value'];
           }
+          break;
 
+        // This equates to choosing filename
         default:
           // If title has no value then filename is substituted
           // See template_preprocess_download_file_link()
