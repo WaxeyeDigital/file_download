@@ -59,6 +59,7 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
     return [
       'file' => $this->t('Title of file'),
       'entity_title' => 'Title of parent entity',
+      'description' => $this->t('Contents of the description field'),
       'empty' => $this->t('Nothing'),
     ];
   }
@@ -102,6 +103,10 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
           }
           break;
 
+        case 'description':
+          $title = $item->description;
+          break;
+
         // This equates to choosing filename
         default:
           // If title has no value then filename is substituted
@@ -109,24 +114,24 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
           $title = NULL;
       }
 
-        $elements[$delta] = array(
-          '#theme' => 'download_file_link',
-          '#file' => $file,
-          '#title' => $title,
-          '#description' => $item->description,
-          '#cache' => array(
-            'tags' => $file->getCacheTags(),
-          ),
-        );
+      $elements[$delta] = array(
+        '#theme' => 'download_file_link',
+        '#file' => $file,
+        '#title' => $title,
+        '#description' => $item->description,
+        '#cache' => array(
+          'tags' => $file->getCacheTags(),
+        ),
+      );
 
-        // Pass field item attributes to the theme function.
-        if (isset($item->_attributes)) {
-          $elements[$delta] += array('#attributes' => array());
-          $elements[$delta]['#attributes'] += $item->_attributes;
-          // Unset field item attributes since they have been included in the
-          // formatter output and should not be rendered in the field template.
-          unset($item->_attributes);
-        }
+      // Pass field item attributes to the theme function.
+      if (isset($item->_attributes)) {
+        $elements[$delta] += array('#attributes' => array());
+        $elements[$delta]['#attributes'] += $item->_attributes;
+        // Unset field item attributes since they have been included in the
+        // formatter output and should not be rendered in the field template.
+        unset($item->_attributes);
+      }
 
     }
 
