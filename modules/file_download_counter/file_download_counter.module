@@ -103,22 +103,22 @@ function file_download_counter_cron() {
 function file_download_counter_title_list($dbfield, $dbrows) {
   if (in_array($dbfield, array('totalcount', 'daycount', 'timestamp'))) {
     $query = db_select('file_managed', 'f');
-    $query->addTag('node_access');
-    $query->join('file_download_counter', 'c', 'f.fid=s.fid');
-    $query->join('users_field_data', 'u', 'n.uid = u.uid');
+    $query->join('file_usage', 'us', 'us.fid = f.fid');
+    $query->join('file_download_counter', 'c', 'f.fid = c.fid');
+    $query->join('node_field_revision', 'nr', 'us.id = nr.nid');
+    $query->join('users_field_data', 'u', 'nr.uid = u.uid');
 
-    return $query
-      ->fields('n', array('nid', 'title'))
-      ->fields('u', array('uid', 'name'))
-      ->condition($dbfield, 0, '<>')
-      ->condition('n.status', 1)
-      // @todo This should be actually filtering on the desired node status
-      //   field language and just fall back to the default language.
-      ->condition('n.default_langcode', 1)
-      ->condition('u.default_langcode', 1)
-      ->orderBy($dbfield, 'DESC')
-      ->range(0, $dbrows)
-      ->execute();
+    $query->addField('nr', 'nid', 'nid');
+    $query->addField('nr', 'title', 'title');
+    $query->addField('u', 'uid', 'uid');
+    $query->addField('u', 'name', 'name');
+    $query->condition($dbfield, 0, '<>');
+    $query->condition('nr.status', 1);
+    $query->condition('nr.default_langcode', 1);
+    return $query->condition('u.default_langcode', 1)
+    ->orderBy($dbfield, 'DESC')
+    ->range(0, $dbrows)
+    ->execute();
   }
   return FALSE;
 }
