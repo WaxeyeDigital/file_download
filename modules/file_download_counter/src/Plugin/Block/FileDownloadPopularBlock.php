@@ -102,7 +102,9 @@ class FileDownloadPopularBlock extends BlockBase {
       $content['top_last'] = node_title_list($result, $this->t('Last viewed:'));
       $content['top_last']['#suffix'] = '<br />';
     }
-
+    $content['#cache'] = array(
+      'max-age' => 0,
+    );
     return $content;
   }
 
