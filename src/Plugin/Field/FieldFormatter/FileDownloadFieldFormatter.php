@@ -28,8 +28,8 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
    */
   public static function defaultSettings() {
     $options = parent::defaultSettings();
-
     $options['link_title'] = 'file';
+    $options['custom_title_text'] = '';
     return $options;
   }
 
@@ -48,6 +48,18 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
     ];
 
     $fieldName = $this->fieldDefinition->getName();
+    $form['custom_title_text'] = array(
+      '#type' => 'textfield',
+      '#title' => $this->t('Custom text'),
+      '#default_value' => $this->getSetting('custom_title_text'),
+      '#placeholder' => $this->t('e.g. "Download"'),
+      '#description' => $this->t('Provide a custom text to display for all download links.'),
+      '#states' => array(
+        'visible' => array(
+          ":input[name=\"fields[{$fieldName}][settings_edit_form][settings][link_title]\"]" => ['value' => 'custom'],
+        ),
+      ),
+    );
 
     return $form;
   }
@@ -58,9 +70,10 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
   private function getDisplayOptions() {
     return [
       'file' => $this->t('Title of file'),
-      'entity_title' => 'Title of parent entity',
+      'entity_title' => $this->t('Title of parent entity'),
       'description' => $this->t('Contents of the description field'),
       'empty' => $this->t('Nothing'),
+      'custom' => $this->t('Custom text')
     ];
   }
 
@@ -68,13 +81,19 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
    * {@inheritdoc}
    */
   public function settingsSummary() {
-    $summary = [];
+
+    $summary = array();
     $settings = $this->getSettings();
     $displayOptions = $this->getDisplayOptions();
 
     $selectedTitleDisplay = $settings['link_title'];
     $tArgs = ['@view' => $displayOptions[$selectedTitleDisplay]];
     $summary[] = $this->t('Title Display: @view', $tArgs);
+
+    if ($selectedTitleDisplay === 'custom') {
+      $tArgs = ['@text' => $settings['custom_title_text']];
+      $summary[] = $this->t('Custom text: @text', $tArgs);
+    }
 
     return $summary;
   }
@@ -101,6 +120,10 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
           if ($entity->get('title')->getValue() != NULL) {
             $title = $entity->get('title')->getValue()[0]['value'];
           }
+          break;
+
+        case 'custom':
+          $title = $settings['custom_title_text'];
           break;
 
         case 'description':
