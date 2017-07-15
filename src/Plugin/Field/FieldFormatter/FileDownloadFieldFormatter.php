@@ -70,7 +70,7 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
   private function getDisplayOptions() {
     return [
       'file' => $this->t('Title of file'),
-      'entity_title' => $this->t('Title of parent entity'),
+      'entity_title' => $this->t('Title of parent entity (if it exists)'),
       'description' => $this->t('Contents of the description field'),
       'empty' => $this->t('Nothing'),
       'custom' => $this->t('Custom text')
@@ -117,8 +117,13 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
 
         case 'entity_title':
           $entity = $items->getEntity();
-          if ($entity->get('title')->getValue() != NULL) {
+          // Some entities do not have title field
+          if ($entity->hasField('title') && $entity->get('title')->getValue() != NULL) {
             $title = $entity->get('title')->getValue()[0]['value'];
+          }
+          else {
+            \Drupal::logger('file_download')->notice('This entity type does not have a title field. Make another selection.  Leaving this selection will result in filename appearing as title');
+            $title = NULL;
           }
           break;
 

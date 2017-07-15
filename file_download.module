@@ -5,6 +5,18 @@ use Drupal\Core\Template\Attribute;
 use Drupal\Core\Url;
 
 /**
+ * Implements hook_help().
+ */
+function file_download_help($route_name, RouteMatchInterface $arg) {
+  switch ($route_name) {
+    case 'help.page.file_download':
+      $output = file_get_contents(drupal_get_path('module', 'file_download') . '/README.md');
+      return \Drupal::moduleHandler()->moduleExists('markdown') ? \Drupal\Component\Utility\Xss::filterAdmin(\Drupal::moduleHandler()->invoke('markdown', 'filter', ['process', 0, -1, $output])) : '<h3>file_download README</h3><pre>' . \Drupal\Component\Utility\Html::escape($output) . '</pre>';
+  }
+}
+
+
+/**
  * Prepares variables for file link templates.
  *
  * Default template: file-link.html.twig.
