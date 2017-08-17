@@ -3,6 +3,7 @@
 use Drupal\file\Entity\File;
 use Drupal\Core\Template\Attribute;
 use Drupal\Core\Url;
+use Drupal\Core\Routing\RouteMatchInterface;
 
 /**
  * Implements hook_help().
@@ -49,7 +50,7 @@ function template_preprocess_download_file_link(&$variables) {
 
 
   // Use the title as the link text if available.
-  if (empty($variables['title'])) {
+  if ($variables['title'] === NULL) {
     $link_text = $file_entity->getFilename();
   }
   else {
