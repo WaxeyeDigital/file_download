@@ -17,20 +17,8 @@ use Drupal\node\NodeInterface;
 function file_download_counter_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
     case 'help.page.file_download_counter':
-      $output = '';
-      $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('The file_download_counter module shows you how often content is viewed. This is useful in determining which pages of your site are most popular. For more information, see the <a href=":file_download_counter_do">online documentation for the file_download_counter module</a>.', array(':file_download_counter_do' => 'https://www.drupal.org/documentation/modules/file_download_counter/')) . '</p>';
-      $output .= '<h3>' . t('Uses') . '</h3>';
-      $output .= '<dl>';
-      $output .= '<dt>' . t('Displaying popular content') . '</dt>';
-      $output .= '<dd>' . t('The module includes a <em>Popular content</em> block that displays the most viewed pages today and for all time, and the last content viewed. To use the block, enable <em>Count content views</em> on the <a href=":file_download_counter-settings">file_download_counter page</a>, and then you can enable and configure the block on the <a href=":blocks">Block layout page</a>.', array(':file_download_counter-settings' => \Drupal::url('file_download_counter.settings'), ':blocks' => (\Drupal::moduleHandler()->moduleExists('block')) ? \Drupal::url('block.admin_display') : '#')) . '</dd>';
-      $output .= '<dt>' . t('Page view counter') . '</dt>';
-      $output .= '<dd>' . t('The file_download_counter module includes a counter for each page that increases whenever the page is viewed. To use the counter, enable <em>Count content views</em> on the <a href=":file_download_counter-settings">file_download_counter page</a>, and set the necessary <a href=":permissions">permissions</a> (<em>View content hits</em>) so that the counter is visible to the users.', array(':file_download_counter-settings' => \Drupal::url('file_download_counter.settings'), ':permissions' => \Drupal::url('user.admin_permissions', array(), array('fragment' => 'module-file_download_counter')))) . '</dd>';
-      $output .= '</dl>';
-      return $output;
-
-    case 'file_download_counter.settings':
-      return '<p>' . t('Settings for the statistical information that Drupal will keep about the site.') . '</p>';
+      $output = file_get_contents(drupal_get_path('module', 'file_download_counter') . '/README.md');
+      return \Drupal::moduleHandler()->moduleExists('markdown') ? \Drupal\Component\Utility\Xss::filterAdmin(\Drupal::moduleHandler()->invoke('markdown', 'filter', ['process', 0, -1, $output])) : '<h3>file_download README</h3><pre>' . \Drupal\Component\Utility\Html::escape($output) . '</pre>';
   }
 }
 
