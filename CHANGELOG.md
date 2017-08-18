@@ -19,6 +19,10 @@ https://www.drupal.org/node/2884185
 Custom title
 https://www.drupal.org/node/2878732
 
-8.x-1.0-beta5
-Unneeded code: https://www.drupal.org/node/2902775
+8.x-1.0-beta6
 Media entity: https://www.drupal.org/node/2894164
+Fix title empty state so it actually works
+
+8.x-1.0-rc1
+Unneeded code: https://www.drupal.org/node/2902775
+Run codesniffer and remove unneeded code
