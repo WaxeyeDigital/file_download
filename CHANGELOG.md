@@ -18,3 +18,7 @@ https://www.drupal.org/node/2884115
 https://www.drupal.org/node/2884185
 Custom title
 https://www.drupal.org/node/2878732
+
+8.x-1.0-beta5
+Unneeded code: https://www.drupal.org/node/2902775
+Media entity: https://www.drupal.org/node/2894164
