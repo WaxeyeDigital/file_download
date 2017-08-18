@@ -22,37 +22,6 @@ function file_download_counter_help($route_name, RouteMatchInterface $route_matc
   }
 }
 
-/**
- * Implements hook_ENTITY_TYPE_view() for node entities.
- */
-//function file_download_counter_node_view(array &$build, EntityInterface $node, EntityViewDisplayInterface $display, $view_mode) {
-//  if (!$node->isNew() && $view_mode == 'full' && node_is_page($node) && empty($node->in_preview)) {
-//    $build['#attached']['library'][] = 'file_download_counter/drupal.file_download_counter';
-//    $settings = array('data' => array('nid' => $node->id()), 'url' => Url::fromUri('base:' . drupal_get_path('module', 'file_download_counter') . '/file_download_counter.php')->toString());
-//    $build['#attached']['drupalSettings']['file_download_counter'] = $settings;
-//  }
-//}
-
-/**
- * Implements hook_node_links_alter().
- */
-//function file_download_counter_node_links_alter(array &$links, NodeInterface $entity, array &$context) {
-//  if ($context['view_mode'] != 'rss') {
-//    $links['#cache']['contexts'][] = 'user.permissions';
-//    if (\Drupal::currentUser()->hasPermission('view post access counter')) {
-//      $file_download_counter = file_download_counter_get($entity->id());
-//      if ($file_download_counter) {
-//        $file_download_counter_links['file_download_counter_counter']['title'] = \Drupal::translation()->formatPlural($file_download_counter['totalcount'], '1 view', '@count views');
-//        $links['file_download_counter'] = array(
-//          '#theme' => 'links__node__file_download_counter',
-//          '#links' => $file_download_counter_links,
-//          '#attributes' => array('class' => array('links', 'inline')),
-//        );
-//      }
-//      $links['#cache']['max-age'] = \Drupal::config('file_download_counter.settings')->get('display_max_age');
-//    }
-//  }
-//}
 
 /**
  * Implements hook_cron().
@@ -63,7 +32,7 @@ function file_download_counter_cron() {
   if ((REQUEST_TIME - $file_download_counter_timestamp) >= 86400) {
     // Reset day counts.
     db_update('file_download_counter')
-      ->fields(array('daycount' => 0))
+      ->fields(['daycount' => 0])
       ->execute();
     \Drupal::state()->set('file_download_counter.day_timestamp', REQUEST_TIME);
   }
@@ -89,7 +58,7 @@ function file_download_counter_cron() {
  *   be executed correctly.
  */
 function file_download_counter_title_list($dbfield, $dbrows) {
-  if (in_array($dbfield, array('totalcount', 'daycount', 'timestamp'))) {
+  if (in_array($dbfield, ['totalcount', 'daycount', 'timestamp'])) {
     $query = db_select('file_managed', 'f');
     $query->join('file_usage', 'us', 'us.fid = f.fid');
     $query->join('file_download_counter', 'c', 'f.fid = c.fid');
@@ -131,7 +100,7 @@ function file_download_counter_get($fid) {
   if ($fid > 0) {
     // Retrieve an array with both totalcount and daycount.
     return db_query('SELECT totalcount, daycount, timestamp FROM {file_download_counter} WHERE nid = :fid',
-      array(':fid' => $fid), array('target' => 'replica'))->fetchAssoc();
+      [':fid' => $fid], ['target' => 'replica'])->fetchAssoc();
   }
 }
 
@@ -151,15 +120,15 @@ function file_download_counter_file_predelete(EntityInterface $file) {
  */
 function file_download_counter_ranking() {
   if (\Drupal::config('file_download_counter.settings')->get('count_content_views')) {
-    return array(
-      'views' => array(
+    return [
+      'views' => [
         'title' => t('Number of downloads'),
-        'join' => array(
+        'join' => [
           'type' => 'LEFT',
           'table' => 'file_download_counter',
           'alias' => 'file_download_counter',
           'on' => 'file_download_counter.fid = i.fid',
-        ),
+        ],
         // Inverse law that maps the highest view count on the site to 1 and 0
         // to 0. Note that the ROUND here is necessary for PostgreSQL and SQLite
         // in order to ensure that the :file_download_counter_scale argument is treated as
@@ -167,9 +136,9 @@ function file_download_counter_ranking() {
         // values in as strings instead of numbers in complex expressions like
         // this.
         'score' => '2.0 - 2.0 / (1.0 + node_counter.totalcount * (ROUND(:file_download_counter_scale, 4)))',
-        'arguments' => array(':file_download_counter_scale' => \Drupal::state()->get('file_download_counter.node_counter_scale') ?: 0),
-      ),
-    );
+        'arguments' => [':file_download_counter_scale' => \Drupal::state()->get('file_download_counter.node_counter_scale') ?: 0],
+      ],
+    ];
   }
 }
 
@@ -203,11 +172,11 @@ function file_download_counter_block_alter(&$definitions) {
 function file_download_counter_increment_file($fid) {
   \Drupal::database()->merge('file_download_counter')
     ->key('fid', $fid)
-    ->fields(array(
+    ->fields([
       'daycount' => 1,
       'totalcount' => 1,
       'timestamp' => REQUEST_TIME,
-    ))
+    ])
     ->expression('daycount', 'daycount + 1')
     ->expression('totalcount', 'totalcount + 1')
     ->execute();

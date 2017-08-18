@@ -18,42 +18,42 @@ function file_download_counter_uninstall() {
  * Implements hook_schema().
  */
 function file_download_counter_schema() {
-  $schema['file_download_counter'] = array(
+  $schema['file_download_counter'] = [
     'description' => 'Access statistics for {node}s.',
-    'fields' => array(
-      'fid' => array(
+    'fields' => [
+      'fid' => [
         'description' => 'The {file}.fid for these statistics.',
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
         'default' => 0,
-      ),
-      'totalcount' => array(
+      ],
+      'totalcount' => [
         'description' => 'The total number of times the {file} has been downloaded.',
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
         'default' => 0,
         'size' => 'big',
-      ),
-      'daycount' => array(
+      ],
+      'daycount' => [
         'description' => 'The total number of times the {file} has been downloaded today.',
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
         'default' => 0,
         'size' => 'medium',
-      ),
-      'timestamp' => array(
+      ],
+      'timestamp' => [
         'description' => 'The most recent time the {file} has been downloaded.',
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
         'default' => 0,
-      ),
-    ),
-    'primary key' => array('fid'),
-  );
+      ],
+    ],
+    'primary key' => ['fid'],
+  ];
 
   return $schema;
 }
@@ -63,7 +63,7 @@ function file_download_counter_schema() {
  */
 function file_download_counter_update_8001() {
   if (!\Drupal::moduleHandler()->moduleExists('node')) {
-    if (\Drupal::service('module_installer')->uninstall(array('file_download_counter'), TRUE)) {
+    if (\Drupal::service('module_installer')->uninstall(['file_download_counter'], TRUE)) {
       return 'The statistics module depends on the node module and has therefore been uninstalled.';
     }
     else {

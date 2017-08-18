@@ -4,11 +4,7 @@ namespace Drupal\file_download\Plugin\Field\FieldFormatter;
 
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\file\Plugin\Field\FieldFormatter\FileFormatterBase;
-use Drupal\Core\Field\FormatterBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\file\Entity\File;
-use Drupal\Core\Entity\EntityInterface;
-
 
 /**
  *
@@ -48,18 +44,18 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
     ];
 
     $fieldName = $this->fieldDefinition->getName();
-    $form['custom_title_text'] = array(
+    $form['custom_title_text'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Custom text'),
       '#default_value' => $this->getSetting('custom_title_text'),
       '#placeholder' => $this->t('e.g. "Download"'),
       '#description' => $this->t('Provide a custom text to display for all download links.'),
-      '#states' => array(
-        'visible' => array(
+      '#states' => [
+        'visible' => [
           ":input[name=\"fields[{$fieldName}][settings_edit_form][settings][link_title]\"]" => ['value' => 'custom'],
-        ),
-      ),
-    );
+        ],
+      ],
+    ];
 
     return $form;
   }
@@ -73,7 +69,7 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
       'entity_title' => $this->t('Title of parent entity (if it exists)'),
       'description' => $this->t('Contents of the description field'),
       'empty' => $this->t('Nothing'),
-      'custom' => $this->t('Custom text')
+      'custom' => $this->t('Custom text'),
     ];
   }
 
@@ -82,7 +78,7 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
    */
   public function settingsSummary() {
 
-    $summary = array();
+    $summary = [];
     $settings = $this->getSettings();
     $displayOptions = $this->getDisplayOptions();
 
@@ -110,14 +106,14 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
 
       switch ($settings['link_title']) {
 
-        // This is useful for instance if you are using an icon
+        // This is useful for instance if you are using an icon.
         case 'empty':
           $title = '';
           break;
 
         case 'entity_title':
           $entity = $items->getEntity();
-          // Some entities do not have title field
+          // Some entities do not have title field.
           if ($entity->hasField('title') && $entity->get('title')->getValue() != NULL) {
             $title = $entity->get('title')->getValue()[0]['value'];
           }
@@ -135,26 +131,26 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
           $title = $item->description;
           break;
 
-        // This equates to choosing filename
+        // This equates to choosing filename.
         default:
           // If title has no value then filename is substituted
           // See template_preprocess_download_file_link()
           $title = NULL;
       }
 
-      $elements[$delta] = array(
+      $elements[$delta] = [
         '#theme' => 'download_file_link',
         '#file' => $file,
         '#title' => $title,
         '#description' => $item->description,
-        '#cache' => array(
+        '#cache' => [
           'tags' => $file->getCacheTags(),
-        ),
-      );
+        ],
+      ];
 
       // Pass field item attributes to the theme function.
       if (isset($item->_attributes)) {
-        $elements[$delta] += array('#attributes' => array());
+        $elements[$delta] += ['#attributes' => []];
         $elements[$delta]['#attributes'] += $item->_attributes;
         // Unset field item attributes since they have been included in the
         // formatter output and should not be rendered in the field template.
