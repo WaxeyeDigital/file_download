@@ -16,20 +16,6 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class FileDownloadDownloadController extends FileDownloadController {
 
   /**
-   * The lock backend.
-   *
-   * @var \Drupal\Core\Lock\LockBackendInterface
-   */
-  protected $lock;
-
-  /**
-   * A logger instance.
-   *
-   * @var \Psr\Log\LoggerInterface
-   */
-  protected $logger;
-
-  /**
    * Generates a download.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
