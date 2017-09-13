@@ -4,7 +4,12 @@ namespace Drupal\file_download\Plugin\Field\FieldFormatter;
 
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\file\Plugin\Field\FieldFormatter\FileFormatterBase;
+use Drupal\Core\Field\FormatterBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\file\Entity\File;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\views\Plugin\views\PluginBase;
+
 
 /**
  *
@@ -49,7 +54,7 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
       '#title' => $this->t('Custom text'),
       '#default_value' => $this->getSetting('custom_title_text'),
       '#placeholder' => $this->t('e.g. "Download"'),
-      '#description' => $this->t('Provide a custom text to display for all download links.'),
+      '#description' => $this->t('Provide a custom text to display for all download links.  This field takes @link', array('@link' => '<a href="/admin/help/token">file entity tokens for current user, file and parent entity.</a>')),
       '#states' => [
         'visible' => [
           ":input[name=\"fields[{$fieldName}][settings_edit_form][settings][link_title]\"]" => ['value' => 'custom'],
@@ -66,10 +71,10 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
   private function getDisplayOptions() {
     return [
       'file' => $this->t('Title of file'),
-      'entity_title' => $this->t('Title of parent entity (if it exists)'),
+      'entity_title' => $this->t('Title of parent entity'),
       'description' => $this->t('Contents of the description field'),
       'empty' => $this->t('Nothing'),
-      'custom' => $this->t('Custom text'),
+      'custom' => $this->t('Custom text')
     ];
   }
 
@@ -99,39 +104,40 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
    */
   public function viewElements(FieldItemListInterface $items, $langcode) {
     $elements = [];
+    $token_data = [
+      'user' => \Drupal::currentUser(),
+      $items->getEntity()->getEntityTypeId() => $items->getEntity(),
+    ];
     $settings = $this->getSettings();
 
     foreach ($this->getEntitiesToView($items, $langcode) as $delta => $file) {
+      $token_data['file'] = $file;
+
       $item = $file->_referringItem;
 
       switch ($settings['link_title']) {
 
-        // This is useful for instance if you are using an icon.
+        // This is useful for instance if you are using an icon
         case 'empty':
           $title = '';
           break;
 
         case 'entity_title':
           $entity = $items->getEntity();
-          // Some entities do not have title field.
-          if ($entity->hasField('title') && $entity->get('title')->getValue() != NULL) {
+          if ($entity->get('title')->getValue() != NULL) {
             $title = $entity->get('title')->getValue()[0]['value'];
-          }
-          else {
-            \Drupal::logger('file_download')->notice('This entity type does not have a title field. Make another selection.  Leaving this selection will result in filename appearing as title');
-            $title = NULL;
           }
           break;
 
         case 'custom':
-          $title = $settings['custom_title_text'];
+          $title = \Drupal::token()->replace($settings['custom_title_text'], $token_data, ['clear' => TRUE]);
           break;
 
         case 'description':
           $title = $item->description;
           break;
 
-        // This equates to choosing filename.
+        // This equates to choosing filename
         default:
           // If title has no value then filename is substituted
           // See template_preprocess_download_file_link()

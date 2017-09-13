@@ -26,3 +26,6 @@ Fix title empty state so it actually works
 8.x-1.0-rc1
 Unneeded code: https://www.drupal.org/node/2902775
 Run codesniffer and remove unneeded code
+
+8.x-1.0
+Add token ability to custom field so user, file and parent entity tokens can be used

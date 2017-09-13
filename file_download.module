@@ -12,6 +12,8 @@ use Drupal\file\Entity\File;
 use Drupal\Core\Template\Attribute;
 use Drupal\Core\Url;
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Render\BubbleableMetadata;
+
 
 /**
  * Implements hook_help().
@@ -95,4 +97,48 @@ function file_download_theme() {
     'download_file_link' => ['variables' => ['file' => NULL, 'title' => NULL, 'description' => NULL, 'attributes' => []]],
     'download_file_title' => ['variables' => ['title' => NULL, 'attributes' => []]],
   ];
+}
+
+
+/*
+ * Implements hook_download_token_info().
+ */
+function file_download_token_info() {
+
+  // Core tokens for nodes.
+  $file['type'] = [
+    'name' => t("File type"),
+    'description' => t("The shortened version of the MIME definition e.g. pdf."),
+  ];
+
+  return [
+    'tokens' => ['file' => $file],
+  ];
+}
+
+/*
+ * Implements hook_download_tokens().
+ */
+function file_download_tokens($type, $tokens, array $data, array $options, BubbleableMetadata $bubbleable_metadata) {
+  $token_service = \Drupal::token();
+
+  $replacements = [];
+
+  if ($type == 'file' && !empty($data['file'])) {
+    /** @var \Drupal\node\NodeInterface $node */
+    $file = $data['file'];
+
+    foreach ($tokens as $name => $original) {
+      switch ($name) {
+        // Simple key values on the node.
+        case 'type':
+          $parts = explode('/', $file->getMimeType());
+          $replacements[$original] = $parts[1];
+          break;
+      }
+    }
+
+  }
+
+  return $replacements;
 }
