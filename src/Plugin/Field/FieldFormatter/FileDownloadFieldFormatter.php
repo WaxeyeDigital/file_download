@@ -54,7 +54,7 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
       '#title' => $this->t('Custom text'),
       '#default_value' => $this->getSetting('custom_title_text'),
       '#placeholder' => $this->t('e.g. "Download"'),
-      '#description' => $this->t('Provide a custom text to display for all download links.  This field takes @link', array('@link' => '<a href="/admin/help/token">file entity tokens for current user, file and parent entity.</a>')),
+      '#description' => $this->t('Provide a custom text to display for all download links.  This field takes HTML and @link', array('@link' => '<a href="/admin/help/token">file entity tokens for current user, file and parent entity.</a>')),
       '#states' => [
         'visible' => [
           ":input[name=\"fields[{$fieldName}][settings_edit_form][settings][link_title]\"]" => ['value' => 'custom'],

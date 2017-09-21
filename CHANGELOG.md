@@ -29,3 +29,6 @@ Run codesniffer and remove unneeded code
 
 8.x-1.0
 Add token ability to custom field so user, file and parent entity tokens can be used
+
+8.x-1.1
+Add ability to include html in the link

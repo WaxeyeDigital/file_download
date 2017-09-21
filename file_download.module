@@ -11,6 +11,7 @@ use Drupal\Component\Utility\Xss;
 use Drupal\file\Entity\File;
 use Drupal\Core\Template\Attribute;
 use Drupal\Core\Url;
+use Drupal\Core\Render\Markup;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Render\BubbleableMetadata;
 
@@ -72,7 +73,7 @@ function template_preprocess_download_file_link(&$variables) {
   // Classes to add to the file field for icons.
   // Add a specific class for each and every mime type.
   $classes = ['file',
-  // Add a more general class for groups of well known MIME types.
+    // Add a more general class for groups of well known MIME types.
     'file--mime-' . strtr($mime_type, ['/' => '-', '.' => '-']),
     'file--' . file_icon_class($mime_type),
   ];
@@ -85,7 +86,12 @@ function template_preprocess_download_file_link(&$variables) {
   $parts = explode('://', $uri);
   $url = 'internal:/file-download/download/' . $parts[0] . '/' . $file_entity->id();
 
-  $variables['link'] = ['#type' => 'link', '#title' => $link_text, '#url' => Url::fromUri($url, $options)];
+  $variables['link'] = [
+    '#type' => 'link',
+    '#title' => Markup::create($link_text),
+    '#url' => Url::fromUri($url, $options),
+    '#allowed_tags' => ['span'],
+  ];
 }
 
 /**
