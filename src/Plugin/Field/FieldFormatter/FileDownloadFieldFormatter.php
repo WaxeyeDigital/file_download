@@ -8,6 +8,7 @@ use Drupal\Core\Field\FormatterBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\file\Entity\File;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\views\Plugin\views\PluginBase;
 
 
 /**
@@ -48,18 +49,18 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
     ];
 
     $fieldName = $this->fieldDefinition->getName();
-    $form['custom_title_text'] = array(
+    $form['custom_title_text'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Custom text'),
       '#default_value' => $this->getSetting('custom_title_text'),
       '#placeholder' => $this->t('e.g. "Download"'),
-      '#description' => $this->t('Provide a custom text to display for all download links.'),
-      '#states' => array(
-        'visible' => array(
+      '#description' => $this->t('Provide a custom text to display for all download links.  This field takes HTML and @link', array('@link' => '<a href="/admin/help/token">file entity tokens for current user, file and parent entity.</a>')),
+      '#states' => [
+        'visible' => [
           ":input[name=\"fields[{$fieldName}][settings_edit_form][settings][link_title]\"]" => ['value' => 'custom'],
-        ),
-      ),
-    );
+        ],
+      ],
+    ];
 
     return $form;
   }
@@ -82,7 +83,7 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
    */
   public function settingsSummary() {
 
-    $summary = array();
+    $summary = [];
     $settings = $this->getSettings();
     $displayOptions = $this->getDisplayOptions();
 
@@ -103,9 +104,15 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
    */
   public function viewElements(FieldItemListInterface $items, $langcode) {
     $elements = [];
+    $token_data = [
+      'user' => \Drupal::currentUser(),
+      $items->getEntity()->getEntityTypeId() => $items->getEntity(),
+    ];
     $settings = $this->getSettings();
 
     foreach ($this->getEntitiesToView($items, $langcode) as $delta => $file) {
+      $token_data['file'] = $file;
+
       $item = $file->_referringItem;
 
       switch ($settings['link_title']) {
@@ -117,13 +124,14 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
 
         case 'entity_title':
           $entity = $items->getEntity();
-          if ($entity->get('title')->getValue() != NULL) {
-            $title = $entity->get('title')->getValue()[0]['value'];
+          $title = NULL;
+          if ($entity->label() != NULL) {
+            $title = $entity->label();
           }
           break;
 
         case 'custom':
-          $title = $settings['custom_title_text'];
+          $title = \Drupal::token()->replace($settings['custom_title_text'], $token_data, ['clear' => TRUE]);
           break;
 
         case 'description':
@@ -137,19 +145,19 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
           $title = NULL;
       }
 
-      $elements[$delta] = array(
+      $elements[$delta] = [
         '#theme' => 'download_file_link',
         '#file' => $file,
         '#title' => $title,
         '#description' => $item->description,
-        '#cache' => array(
+        '#cache' => [
           'tags' => $file->getCacheTags(),
-        ),
-      );
+        ],
+      ];
 
       // Pass field item attributes to the theme function.
       if (isset($item->_attributes)) {
-        $elements[$delta] += array('#attributes' => array());
+        $elements[$delta] += ['#attributes' => []];
         $elements[$delta]['#attributes'] += $item->_attributes;
         // Unset field item attributes since they have been included in the
         // formatter output and should not be rendered in the field template.

@@ -2,47 +2,28 @@
 
 namespace Drupal\file_download\Controller;
 
-use Drupal\Component\Utility\Crypt;
 use Drupal\system\FileDownloadController;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Drupal\file\Entity\File;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
-use Drupal\Core\Extension\ModuleHandler;
 use Drupal\Component\Utility\Unicode;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * Defines a controller to serve file downloads
+ * Defines a controller to serve file downloads.
  */
 class FileDownloadDownloadController extends FileDownloadController {
 
   /**
-   * The lock backend.
-   *
-   * @var \Drupal\Core\Lock\LockBackendInterface
-   */
-  protected $lock;
-
-  /**
-   * A logger instance.
-   *
-   * @var \Psr\Log\LoggerInterface
-   */
-  protected $logger;
-
-   /**
-   * Generates a download
+   * Generates a download.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The request object.
    * @param string $scheme
    *   The file scheme, defaults to 'private'.
    * @param \Drupal\file\Entity $fid
-   *   The file id
+   *   The file id.
    *
    * @return \Symfony\Component\HttpFoundation\BinaryFileResponse|\Symfony\Component\HttpFoundation\Response
    *   The transferred file as response or some error response.
@@ -59,18 +40,15 @@ class FileDownloadDownloadController extends FileDownloadController {
       throw new NotFoundHttpException();
     }
     $uri = $file->getFileUri();
-    $parts = explode('://', $uri);
-    $file_directory = \Drupal::service('file_system')->realpath($scheme . "://");
-    $filepath = $file_directory . '/' . $parts[1];
     $filename = $file->getFilename();
 
     // File doesn't exist
-    // This may occur if the download path is used outside of a formatter and the file path is wrong or file is gone
-    if (!file_exists($filepath)) {
+    // This may occur if the download path is used outside of a formatter and the file path is wrong or file is gone.
+    if (!file_exists($uri)) {
       throw new NotFoundHttpException();
     }
 
-    $headers = $this->moduleHandler()->invokeAll('file_download', array($uri));
+    $headers = $this->moduleHandler()->invokeAll('file_download', [$uri]);
 
     foreach ($headers as $result) {
       if ($result == -1) {
@@ -79,7 +57,7 @@ class FileDownloadDownloadController extends FileDownloadController {
     }
 
     $mimetype = Unicode::mimeHeaderEncode($file->getMimeType());
-    $headers = array(
+    $headers = [
       'Content-Type'              => $mimetype,
       'Content-Disposition'       => 'attachment; filename="' . $filename . '"',
       'Content-Length'            => $file->getSize(),
@@ -87,10 +65,10 @@ class FileDownloadDownloadController extends FileDownloadController {
       'Pragma'                    => 'no-cache',
       'Cache-Control'             => 'must-revalidate, post-check=0, pre-check=0',
       'Expires'                   => '0',
-      'Accept-Ranges'             => 'bytes'
-    );
+      'Accept-Ranges'             => 'bytes',
+    ];
 
-    // Update file counter
+    // Update file counter.
     if (\Drupal::moduleHandler()->moduleExists('file_download_counter')) {
       $count_downloads = \Drupal::config('file_download_counter.settings')->get('count_downloads');
       if ($count_downloads) {
@@ -104,6 +82,5 @@ class FileDownloadDownloadController extends FileDownloadController {
     // $public parameter to make sure we don't change the headers.
     return new BinaryFileResponse($uri, 200, $headers, $scheme !== 'private');
   }
-
 
 }

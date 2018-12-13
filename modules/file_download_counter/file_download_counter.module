@@ -17,54 +17,11 @@ use Drupal\node\NodeInterface;
 function file_download_counter_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
     case 'help.page.file_download_counter':
-      $output = '';
-      $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('The file_download_counter module shows you how often content is viewed. This is useful in determining which pages of your site are most popular. For more information, see the <a href=":file_download_counter_do">online documentation for the file_download_counter module</a>.', array(':file_download_counter_do' => 'https://www.drupal.org/documentation/modules/file_download_counter/')) . '</p>';
-      $output .= '<h3>' . t('Uses') . '</h3>';
-      $output .= '<dl>';
-      $output .= '<dt>' . t('Displaying popular content') . '</dt>';
-      $output .= '<dd>' . t('The module includes a <em>Popular content</em> block that displays the most viewed pages today and for all time, and the last content viewed. To use the block, enable <em>Count content views</em> on the <a href=":file_download_counter-settings">file_download_counter page</a>, and then you can enable and configure the block on the <a href=":blocks">Block layout page</a>.', array(':file_download_counter-settings' => \Drupal::url('file_download_counter.settings'), ':blocks' => (\Drupal::moduleHandler()->moduleExists('block')) ? \Drupal::url('block.admin_display') : '#')) . '</dd>';
-      $output .= '<dt>' . t('Page view counter') . '</dt>';
-      $output .= '<dd>' . t('The file_download_counter module includes a counter for each page that increases whenever the page is viewed. To use the counter, enable <em>Count content views</em> on the <a href=":file_download_counter-settings">file_download_counter page</a>, and set the necessary <a href=":permissions">permissions</a> (<em>View content hits</em>) so that the counter is visible to the users.', array(':file_download_counter-settings' => \Drupal::url('file_download_counter.settings'), ':permissions' => \Drupal::url('user.admin_permissions', array(), array('fragment' => 'module-file_download_counter')))) . '</dd>';
-      $output .= '</dl>';
-      return $output;
-
-    case 'file_download_counter.settings':
-      return '<p>' . t('Settings for the statistical information that Drupal will keep about the site.') . '</p>';
+      $output = file_get_contents(drupal_get_path('module', 'file_download_counter') . '/README.md');
+      return \Drupal::moduleHandler()->moduleExists('markdown') ? \Drupal\Component\Utility\Xss::filterAdmin(\Drupal::moduleHandler()->invoke('markdown', 'filter', ['process', 0, -1, $output])) : '<h3>file_download README</h3><pre>' . \Drupal\Component\Utility\Html::escape($output) . '</pre>';
   }
 }
 
-/**
- * Implements hook_ENTITY_TYPE_view() for node entities.
- */
-//function file_download_counter_node_view(array &$build, EntityInterface $node, EntityViewDisplayInterface $display, $view_mode) {
-//  if (!$node->isNew() && $view_mode == 'full' && node_is_page($node) && empty($node->in_preview)) {
-//    $build['#attached']['library'][] = 'file_download_counter/drupal.file_download_counter';
-//    $settings = array('data' => array('nid' => $node->id()), 'url' => Url::fromUri('base:' . drupal_get_path('module', 'file_download_counter') . '/file_download_counter.php')->toString());
-//    $build['#attached']['drupalSettings']['file_download_counter'] = $settings;
-//  }
-//}
-
-/**
- * Implements hook_node_links_alter().
- */
-//function file_download_counter_node_links_alter(array &$links, NodeInterface $entity, array &$context) {
-//  if ($context['view_mode'] != 'rss') {
-//    $links['#cache']['contexts'][] = 'user.permissions';
-//    if (\Drupal::currentUser()->hasPermission('view post access counter')) {
-//      $file_download_counter = file_download_counter_get($entity->id());
-//      if ($file_download_counter) {
-//        $file_download_counter_links['file_download_counter_counter']['title'] = \Drupal::translation()->formatPlural($file_download_counter['totalcount'], '1 view', '@count views');
-//        $links['file_download_counter'] = array(
-//          '#theme' => 'links__node__file_download_counter',
-//          '#links' => $file_download_counter_links,
-//          '#attributes' => array('class' => array('links', 'inline')),
-//        );
-//      }
-//      $links['#cache']['max-age'] = \Drupal::config('file_download_counter.settings')->get('display_max_age');
-//    }
-//  }
-//}
 
 /**
  * Implements hook_cron().
@@ -75,7 +32,7 @@ function file_download_counter_cron() {
   if ((REQUEST_TIME - $file_download_counter_timestamp) >= 86400) {
     // Reset day counts.
     db_update('file_download_counter')
-      ->fields(array('daycount' => 0))
+      ->fields(['daycount' => 0])
       ->execute();
     \Drupal::state()->set('file_download_counter.day_timestamp', REQUEST_TIME);
   }
@@ -101,7 +58,7 @@ function file_download_counter_cron() {
  *   be executed correctly.
  */
 function file_download_counter_title_list($dbfield, $dbrows) {
-  if (in_array($dbfield, array('totalcount', 'daycount', 'timestamp'))) {
+  if (in_array($dbfield, ['totalcount', 'daycount', 'timestamp'])) {
     $query = db_select('file_managed', 'f');
     $query->join('file_usage', 'us', 'us.fid = f.fid');
     $query->join('file_download_counter', 'c', 'f.fid = c.fid');
@@ -143,7 +100,7 @@ function file_download_counter_get($fid) {
   if ($fid > 0) {
     // Retrieve an array with both totalcount and daycount.
     return db_query('SELECT totalcount, daycount, timestamp FROM {file_download_counter} WHERE nid = :fid',
-      array(':fid' => $fid), array('target' => 'replica'))->fetchAssoc();
+      [':fid' => $fid], ['target' => 'replica'])->fetchAssoc();
   }
 }
 
@@ -163,15 +120,15 @@ function file_download_counter_file_predelete(EntityInterface $file) {
  */
 function file_download_counter_ranking() {
   if (\Drupal::config('file_download_counter.settings')->get('count_content_views')) {
-    return array(
-      'views' => array(
+    return [
+      'views' => [
         'title' => t('Number of downloads'),
-        'join' => array(
+        'join' => [
           'type' => 'LEFT',
           'table' => 'file_download_counter',
           'alias' => 'file_download_counter',
           'on' => 'file_download_counter.fid = i.fid',
-        ),
+        ],
         // Inverse law that maps the highest view count on the site to 1 and 0
         // to 0. Note that the ROUND here is necessary for PostgreSQL and SQLite
         // in order to ensure that the :file_download_counter_scale argument is treated as
@@ -179,9 +136,9 @@ function file_download_counter_ranking() {
         // values in as strings instead of numbers in complex expressions like
         // this.
         'score' => '2.0 - 2.0 / (1.0 + node_counter.totalcount * (ROUND(:file_download_counter_scale, 4)))',
-        'arguments' => array(':file_download_counter_scale' => \Drupal::state()->get('file_download_counter.node_counter_scale') ?: 0),
-      ),
-    );
+        'arguments' => [':file_download_counter_scale' => \Drupal::state()->get('file_download_counter.node_counter_scale') ?: 0],
+      ],
+    ];
   }
 }
 
@@ -215,11 +172,11 @@ function file_download_counter_block_alter(&$definitions) {
 function file_download_counter_increment_file($fid) {
   \Drupal::database()->merge('file_download_counter')
     ->key('fid', $fid)
-    ->fields(array(
+    ->fields([
       'daycount' => 1,
       'totalcount' => 1,
       'timestamp' => REQUEST_TIME,
-    ))
+    ])
     ->expression('daycount', 'daycount + 1')
     ->expression('totalcount', 'totalcount + 1')
     ->execute();

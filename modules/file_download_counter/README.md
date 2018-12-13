@@ -1,9 +1,9 @@
-File Download
-=============
+File Download Counter
+=====================
 
 INTRODUCTION
 ------------
-Provides a formatter to use that allows users to download file and image entities directly.
+Provides a counter to use with the file download field formatter.
 
 INSTALLATION
 ------------
@@ -19,7 +19,7 @@ composer require drupal/file_download
 CONFIGURATION
 -------------
 Apply formatter to the display form of any file or image field
-Apply settings for link title, currently you can choose filename, entity title, file description or nothing
+Apply settings for link title, currently you can choose filename, entity title (if it exists), file description or nothing
 
 MAINTAINERS
 -----------
