@@ -100,8 +100,22 @@ function template_preprocess_download_file_link(&$variables) {
 function file_download_theme() {
   // From file.module.
   return [
-    'download_file_link' => ['variables' => ['file' => NULL, 'title' => NULL, 'description' => NULL, 'attributes' => []]],
-    'download_file_title' => ['variables' => ['title' => NULL, 'attributes' => []]],
+    'download_file_link' => [
+      'variables' => [
+        'file' => NULL,
+        'title' => NULL,
+        'description' => NULL,
+        'size' => NULL,
+        'raw_size' => NULL,
+        'attributes' => [],
+      ]
+    ],
+    'download_file_title' => [
+      'variables' => [
+        'title' => NULL,
+        'attributes' => [],
+      ]
+    ],
   ];
 }
 

@@ -26,6 +26,7 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
     $options = parent::defaultSettings();
     $options['link_title'] = 'file';
     $options['custom_title_text'] = '';
+    $options['file_size'] = 0;
     return $options;
   }
 
@@ -55,6 +56,13 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
           ":input[name=\"fields[{$fieldName}][settings_edit_form][settings][link_title]\"]" => ['value' => 'custom'],
         ],
       ],
+    ];
+
+    $form['file_size'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Display file size'),
+      '#description' => $this->t('Displays the size of the file next to the download link.'),
+      '#default_value' => $this->getSetting('file_size'),
     ];
 
     return $form;
@@ -155,6 +163,11 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
           'tags' => $file->getCacheTags(),
         ],
       ];
+
+      if ($settings['file_size']) {
+        $elements[$delta]['#size'] = format_size($file->getSize());
+        $elements[$delta]['#raw_size']  = $file->getSize();
+      }
 
       // Pass field item attributes to the theme function.
       if (isset($item->_attributes)) {
