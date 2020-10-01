@@ -46,3 +46,4 @@ Provide URI formatter: https://www.drupal.org/project/file_download/issues/30687
 Incorrect DB table name: https://www.drupal.org/project/file_download/issues/3097358
 Add file size: https://www.drupal.org/project/file_download/issues/3102513
 t() calls should be avoided in classes: https://www.drupal.org/project/file_download/issues/3129183
+Unknown column in table: https://www.drupal.org/project/file_download/issues/3110882

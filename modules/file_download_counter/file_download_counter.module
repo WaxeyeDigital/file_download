@@ -96,7 +96,7 @@ function file_download_counter_get($fid) {
 
   if ($fid > 0) {
     // Retrieve an array with both totalcount and daycount.
-     return \Drupal\core\Database\Database::getConnection('replica')->query('SELECT totalcount, daycount, timestamp FROM {file_download_counter} WHERE nid = :fid', [':fid' => $fid], [])->fetchAssoc();
+     return \Drupal\core\Database\Database::getConnection('replica')->query('SELECT totalcount, daycount, timestamp FROM {file_download_counter} WHERE fid = :fid', [':fid' => $fid], [])->fetchAssoc();
   }
 }
 
