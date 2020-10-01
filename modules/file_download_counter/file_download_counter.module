@@ -6,10 +6,7 @@
  */
 
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\Core\Url;
-use Drupal\node\NodeInterface;
 
 /**
  * Implements hook_help().
@@ -38,7 +35,7 @@ function file_download_counter_cron() {
   }
 
   // Calculate the maximum of node views, for node search ranking.
-  \Drupal::state()->set('file_download_counter.node_counter_scale', 1.0 / max(1.0, \Drupal::database()->query('SELECT MAX(totalcount) FROM {node_counter}')->fetchField()));
+  \Drupal::state()->set('file_download_counter.node_counter_scale', 1.0 / max(1.0, \Drupal::database()->query('SELECT MAX(totalcount) FROM {file_download_counter}')->fetchField()));
 }
 
 /**
