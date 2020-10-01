@@ -37,3 +37,12 @@ Add ability to include html in the link
 Counter handlers not working: https://www.drupal.org/project/file_download/issues/2922571
 Title fallback to filename: https://www.drupal.org/project/file_download/issues/2993613
 Prefix dependencies: https://www.drupal.org/project/file_download/issues/3001455
+
+8.x-1.4
+Drupal 9 Updates
+
+8.x-1.5
+Provide URI formatter: https://www.drupal.org/project/file_download/issues/3068726
+Incorrect DB table name: https://www.drupal.org/project/file_download/issues/3097358
+Add file size: https://www.drupal.org/project/file_download/issues/3102513
+t() calls should be avoided in classes: https://www.drupal.org/project/file_download/issues/3129183

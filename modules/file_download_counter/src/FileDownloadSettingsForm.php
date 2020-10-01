@@ -67,14 +67,14 @@ class FileDownloadSettingsForm extends ConfigFormBase {
     // Content counter settings.
     $form['content'] = [
       '#type' => 'details',
-      '#title' => t('File download counter settings'),
+      '#title' => $this->t('File download counter settings'),
       '#open' => TRUE,
     ];
     $form['content']['file_download_counter_count_downloads'] = [
       '#type' => 'checkbox',
-      '#title' => t('Count downloads'),
+      '#title' => $this->t('Count downloads'),
       '#default_value' => $config->get('count_downloads'),
-      '#description' => t('Increment a counter each time content is downloaded.'),
+      '#description' => $this->t('Increment a counter each time content is downloaded.'),
     ];
 
     return parent::buildForm($form, $form_state);
