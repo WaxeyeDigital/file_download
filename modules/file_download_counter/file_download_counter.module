@@ -29,16 +29,16 @@ function file_download_counter_help($route_name, RouteMatchInterface $route_matc
 function file_download_counter_cron() {
   $file_download_counter_timestamp = \Drupal::state()->get('file_download_counter.day_timestamp') ?: 0;
 
-  if ((REQUEST_TIME - $file_download_counter_timestamp) >= 86400) {
+  if ((\Drupal::time()->getRequestTime() - $file_download_counter_timestamp) >= 86400) {
     // Reset day counts.
-    db_update('file_download_counter')
+    \Drupal::database()->update('file_download_counter')
       ->fields(['daycount' => 0])
       ->execute();
-    \Drupal::state()->set('file_download_counter.day_timestamp', REQUEST_TIME);
+    \Drupal::state()->set('file_download_counter.day_timestamp', \Drupal::time()->getRequestTime());
   }
 
   // Calculate the maximum of node views, for node search ranking.
-  \Drupal::state()->set('file_download_counter.node_counter_scale', 1.0 / max(1.0, db_query('SELECT MAX(totalcount) FROM {node_counter}')->fetchField()));
+  \Drupal::state()->set('file_download_counter.node_counter_scale', 1.0 / max(1.0, \Drupal::database()->query('SELECT MAX(totalcount) FROM {node_counter}')->fetchField()));
 }
 
 /**
@@ -59,7 +59,7 @@ function file_download_counter_cron() {
  */
 function file_download_counter_title_list($dbfield, $dbrows) {
   if (in_array($dbfield, ['totalcount', 'daycount', 'timestamp'])) {
-    $query = db_select('file_managed', 'f');
+    $query = \Drupal::database()->select('file_managed', 'f');
     $query->join('file_usage', 'us', 'us.fid = f.fid');
     $query->join('file_download_counter', 'c', 'f.fid = c.fid');
     $query->join('node_field_revision', 'nr', 'us.id = nr.nid');
@@ -99,8 +99,7 @@ function file_download_counter_get($fid) {
 
   if ($fid > 0) {
     // Retrieve an array with both totalcount and daycount.
-    return db_query('SELECT totalcount, daycount, timestamp FROM {file_download_counter} WHERE nid = :fid',
-      [':fid' => $fid], ['target' => 'replica'])->fetchAssoc();
+     return \Drupal\core\Database\Database::getConnection('replica')->query('SELECT totalcount, daycount, timestamp FROM {file_download_counter} WHERE nid = :fid', [':fid' => $fid], [])->fetchAssoc();
   }
 }
 
@@ -110,7 +109,7 @@ function file_download_counter_get($fid) {
 
 function file_download_counter_file_predelete(EntityInterface $file) {
   // Clean up file_download_counter table when node is deleted.
-  db_delete('file_download_counter')
+  \Drupal::database()->delete('file_download_counter')
     ->condition('fid', $file->id())
     ->execute();
 }
@@ -175,7 +174,7 @@ function file_download_counter_increment_file($fid) {
     ->fields([
       'daycount' => 1,
       'totalcount' => 1,
-      'timestamp' => REQUEST_TIME,
+      'timestamp' => \Drupal::time()->getRequestTime(),
     ])
     ->expression('daycount', 'daycount + 1')
     ->expression('totalcount', 'totalcount + 1')

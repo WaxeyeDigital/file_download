@@ -4,12 +4,7 @@ namespace Drupal\file_download\Plugin\Field\FieldFormatter;
 
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\file\Plugin\Field\FieldFormatter\FileFormatterBase;
-use Drupal\Core\Field\FormatterBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\file\Entity\File;
-use Drupal\Core\Entity\EntityInterface;
-use Drupal\views\Plugin\views\PluginBase;
-
 
 /**
  *
@@ -54,7 +49,7 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
       '#title' => $this->t('Custom text'),
       '#default_value' => $this->getSetting('custom_title_text'),
       '#placeholder' => $this->t('e.g. "Download"'),
-      '#description' => $this->t('Provide a custom text to display for all download links.  This field takes HTML and @link', array('@link' => '<a href="/admin/help/token">file entity tokens for current user, file and parent entity.</a>')),
+      '#description' => $this->t('Provide a custom text to display for all download links.  This field takes HTML and @link', ['@link' => '<a href="/admin/help/token">file entity tokens for current user, file and parent entity.</a>']),
       '#states' => [
         'visible' => [
           ":input[name=\"fields[{$fieldName}][settings_edit_form][settings][link_title]\"]" => ['value' => 'custom'],
@@ -74,7 +69,7 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
       'entity_title' => $this->t('Title of parent entity'),
       'description' => $this->t('Contents of the description field'),
       'empty' => $this->t('Nothing'),
-      'custom' => $this->t('Custom text')
+      'custom' => $this->t('Custom text'),
     ];
   }
 
@@ -117,7 +112,7 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
 
       switch ($settings['link_title']) {
 
-        // This is useful for instance if you are using an icon
+        // This is useful for instance if you are using an icon.
         case 'empty':
           $title = '';
           break;
@@ -138,7 +133,7 @@ class FileDownloadFieldFormatter extends FileFormatterBase {
           $title = $item->description;
           break;
 
-        // This equates to choosing filename
+        // This equates to choosing filename.
         default:
           // If title has no value then filename is substituted
           // See template_preprocess_download_file_link()

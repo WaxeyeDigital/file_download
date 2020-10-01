@@ -52,7 +52,7 @@ function file_download_counter_tokens($type, $tokens, array $data, array $option
       }
       elseif ($name == 'last-view') {
         $file_download_counter = file_download_counter_get($file->id());
-        $replacements[$original] = format_date($file_download_counter['timestamp']);
+        $replacements[$original] = \Drupal::service('date.formatter')->format($file_download_counter['timestamp']);
       }
     }
 

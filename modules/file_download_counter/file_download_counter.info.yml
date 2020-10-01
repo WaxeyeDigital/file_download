@@ -3,6 +3,7 @@ type: module
 description: 'Logs file downloads for the file download field formatter.'
 version: VERSION
 core: 8.x
+core_version_requirement: ^8 || ^9
 configure: file_download_counter.settings
 dependencies:
   - file_download:file_download
