@@ -56,7 +56,7 @@ class FileDownloadDownloadController extends FileDownloadController {
       }
     }
 
-    $mimetype = Unicode::mimeHeaderEncode($file->getMimeType());
+    $mimetype = $file->getMimeType();
     $headers = [
       'Content-Type'              => $mimetype,
       'Content-Disposition'       => 'attachment; filename="' . $filename . '"',
